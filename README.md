@@ -2,7 +2,8 @@
 
 ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat-square&logo=playwright&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?style=flat-square&logo=github-actions&logoColor=white)
+[![CI](https://github.com/damlapnar/playwright-web-automation/actions/workflows/playwright.yml/badge.svg)](https://github.com/damlapnar/playwright-web-automation/actions/workflows/playwright.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 End-to-end web automation framework built with Playwright and TypeScript. Features Page Object Model, custom fixtures, parallel cross-browser execution, and full CI/CD integration via GitHub Actions.
 
