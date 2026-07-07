@@ -26,7 +26,8 @@ export const authenticatedTest = base.extend<Pages>({
     );
     await use(loginPage);
   },
-  inventoryPage: async ({ page }, use) => {
+  // depends on loginPage so login runs before inventoryPage is handed to the test
+  inventoryPage: async ({ page, loginPage: _l }, use) => {
     await use(new InventoryPage(page));
   },
 });
