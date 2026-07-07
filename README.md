@@ -66,3 +66,38 @@ npm run report
 ## CI/CD
 
 Tests run automatically on every push and pull request via GitHub Actions across all three browsers in parallel. Scheduled runs execute every weekday at 8 AM.
+
+---
+
+## Test Architecture
+
+### Why Playwright?
+Playwright's async API and built-in auto-waiting eliminate flaky sleeps. Native TypeScript support means compile-time safety across the entire framework. The multi-browser engine (Chromium, Firefox, WebKit) covers a wider matrix than WebDriver-based tools without requiring separate driver binaries.
+
+### Design Decisions
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Fixture pattern | Custom `authenticatedTest` | Keeps login state DRY; Playwright lazily instantiates only what each test requests |
+| Page Object Model | Typed POMs per page | Encapsulates selectors; tests break at the POM layer not the spec layer |
+| API layer separation | `tests/api/` vs `tests/e2e/` | API contract tests run faster and in parallel; E2E tests validate full user flows |
+| Parallel execution | Workers per browser | GitHub Actions matrix runs all browsers simultaneously; fail-fast=false catches all regressions |
+
+### Test Pyramid
+```
+        ┌──────────────────┐
+        │   E2E (Playwright)│  ← 6 spec files, full browser
+        ├──────────────────┤
+        │   API Tests       │  ← 2 spec files, HTTP only
+        └──────────────────┘
+```
+
+### Adding a New Test
+1. Create or update the relevant POM in `pages/`
+2. Add the spec in `tests/e2e/` (import `authenticatedTest` for logged-in flows)
+3. Run locally: `npx playwright test --project=chromium`
+
+### Running with Docker
+```bash
+docker build -t pw-tests .
+docker run --rm -v $(pwd)/playwright-report:/app/playwright-report pw-tests
+```
