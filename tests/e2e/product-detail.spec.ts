@@ -2,7 +2,7 @@ import { authenticatedTest as test, expect } from '../../fixtures/auth.fixture';
 import { ProductPage } from '../../pages/ProductPage';
 
 test.describe('Product Detail Page', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, inventoryPage: _ }) => {
     await page.locator('.inventory_item_name').first().click();
   });
 
