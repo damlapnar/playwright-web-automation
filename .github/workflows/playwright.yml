@@ -28,17 +28,18 @@ jobs:
         run: npm install
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps \${{ matrix.browser }}
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run Playwright tests
-        run: npx playwright test --project=\${{ matrix.browser }}
+        run: npx playwright test --project=${{ matrix.browser }}
         env:
-          BASE_URL: \${{ secrets.BASE_URL || 'https://www.saucedemo.com' }}
+          BASE_URL: https://www.saucedemo.com
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report-\${{ matrix.browser }}
+          name: playwright-report-${{ matrix.browser }}
           path: playwright-report/
+          if-no-files-found: ignore
           retention-days: 30
