@@ -17,7 +17,7 @@ test.describe('Navigation & Header', () => {
     await page.locator('#react-burger-menu-btn').click();
     await expect(page.locator('.bm-menu-wrap')).toBeVisible();
     await page.locator('#react-burger-cross-btn').click();
-    await expect(page.locator('.bm-menu-wrap')).not.toBeVisible();
+    await expect(page.locator('.bm-menu-wrap')).toBeHidden();
   });
 
   test('should logout and redirect to login page', async ({ page, inventoryPage: _ }) => {
@@ -32,6 +32,6 @@ test.describe('Navigation & Header', () => {
     await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
     await page.locator('#react-burger-menu-btn').click();
     await page.locator('#reset_sidebar_link').click();
-    await expect(page.locator('.shopping_cart_badge')).not.toBeVisible();
+    await expect(page.locator('.shopping_cart_badge')).toBeHidden();
   });
 });

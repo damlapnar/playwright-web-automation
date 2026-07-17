@@ -15,7 +15,7 @@ cartTest.describe('Cart', () => {
 
   cartTest('cart badge disappears after removing all items', async ({ cartPage, page }) => {
     await cartPage.removeItem(products.backpack);
-    await expect(page.locator('.shopping_cart_badge')).not.toBeVisible();
+    await expect(page.locator('.shopping_cart_badge')).toBeHidden();
   });
 
   cartTest('each cart item shows its price', async ({ cartPage: _c, page }) => {
@@ -41,13 +41,16 @@ authenticatedTest.describe('Cart (multiple items)', () => {
     await cart.expectItemInCart(products.bikeLight);
   });
 
-  authenticatedTest('removing one of multiple items updates count', async ({ inventoryPage, page }) => {
-    await inventoryPage.addItemToCart(products.backpack);
-    await inventoryPage.addItemToCart(products.bikeLight);
-    await inventoryPage.goToCart();
-    const cart = new CartPage(page);
-    await cart.removeItem(products.backpack);
-    expect(await cart.getItemCount()).toBe(1);
-    await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
-  });
+  authenticatedTest(
+    'removing one of multiple items updates count',
+    async ({ inventoryPage, page }) => {
+      await inventoryPage.addItemToCart(products.backpack);
+      await inventoryPage.addItemToCart(products.bikeLight);
+      await inventoryPage.goToCart();
+      const cart = new CartPage(page);
+      await cart.removeItem(products.backpack);
+      expect(await cart.getItemCount()).toBe(1);
+      await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+    }
+  );
 });

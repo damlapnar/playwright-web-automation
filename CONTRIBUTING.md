@@ -48,6 +48,17 @@ To update your local macOS baselines instead, run:
 npx playwright test tests/e2e/visual.spec.ts --update-snapshots
 ```
 
+## Linting & Formatting
+
+```bash
+npm run lint          # ESLint (includes eslint-plugin-playwright rules)
+npm run lint:fix
+npm run format:check  # Prettier
+npm run format
+```
+
+Both run in CI as a required check before the test matrix.
+
 ## Guidelines
 
 - Follow the existing code style and naming conventions
@@ -66,6 +77,7 @@ npx playwright test tests/e2e/visual.spec.ts --update-snapshots
 ## Reporting Bugs
 
 Open a GitHub Issue with:
+
 - Steps to reproduce
 - Expected vs actual behavior
 - Environment details (OS, browser/runtime version)

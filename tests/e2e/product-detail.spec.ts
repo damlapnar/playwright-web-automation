@@ -24,8 +24,7 @@ test.describe('Product Detail Page', () => {
   test('should show remove button after adding to cart', async ({ page }) => {
     const product = new ProductPage(page);
     await product.addToCart();
-    await expect(page.locator('[data-test^="remove"]'))
-      .toBeVisible();
+    await expect(page.locator('[data-test^="remove"]')).toBeVisible();
   });
 
   test('should navigate back to inventory', async ({ page }) => {

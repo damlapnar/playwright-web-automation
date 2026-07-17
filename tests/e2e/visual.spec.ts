@@ -18,7 +18,7 @@ test.describe('Visual Regression', () => {
 });
 
 authenticatedTest.describe('Visual Regression (authenticated)', () => {
-  authenticatedTest('inventory page', async ({ inventoryPage, page }) => {
+  authenticatedTest('inventory page', async ({ inventoryPage: _i, page }) => {
     await expect(page).toHaveScreenshot('inventory-page.png', {
       mask: [page.locator('.shopping_cart_badge')],
     });

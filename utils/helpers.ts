@@ -10,7 +10,9 @@ export function generateRandomEmail(): string {
 }
 
 export function generateRandomString(length = 8): string {
-  return Math.random().toString(36).substring(2, length + 2);
+  return Math.random()
+    .toString(36)
+    .substring(2, length + 2);
 }
 
 export async function takeScreenshot(page: Page, name: string) {
