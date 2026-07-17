@@ -5,3 +5,4 @@ test-results
 allure-report
 allure-results
 tests/e2e/*.spec.ts-snapshots
+package-lock.json
