@@ -18,17 +18,47 @@ export const test = base.extend<Pages>({
   },
 });
 
-export const authenticatedTest = base.extend<Pages>({
-  loginPage: async ({ page }, use) => {
-    const loginPage = new LoginPage(page);
-    await loginPage.navigate();
-    await loginPage.login(users.standard.username, users.standard.password);
-    // Wait for navigation to inventory page to complete before handing off
-    await page.waitForURL('**/inventory.html');
-    await use(loginPage);
+type AuthWorkerFixtures = {
+  authStorageState: string;
+};
+
+export const authenticatedTest = base.extend<Pages, AuthWorkerFixtures>({
+  // Logs in through the real UI once per worker instead of once per test —
+  // the storageState (cookies/localStorage) is then reused to hand every
+  // test in that worker an already-authenticated context, cutting a full
+  // login round-trip out of every authenticated test.
+  authStorageState: [
+    async ({ browser }, use) => {
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      const loginPage = new LoginPage(page);
+      await loginPage.navigate();
+      await loginPage.login(users.standard.username, users.standard.password);
+      await page.waitForURL('**/inventory.html');
+      const storageState = await context.storageState();
+      await context.close();
+      await use(JSON.stringify(storageState));
+    },
+    { scope: 'worker' },
+  ],
+
+  context: async ({ browser, authStorageState }, use) => {
+    const context = await browser.newContext({ storageState: JSON.parse(authStorageState) });
+    await use(context);
+    await context.close();
   },
-  // depends on loginPage so login and navigation both complete first
-  inventoryPage: async ({ page, loginPage: _l }, use) => {
+
+  page: async ({ context, baseURL }, use) => {
+    const page = await context.newPage();
+    await page.goto(`${baseURL}/inventory.html`);
+    await use(page);
+  },
+
+  loginPage: async ({ page }, use) => {
+    await use(new LoginPage(page));
+  },
+
+  inventoryPage: async ({ page }, use) => {
     await use(new InventoryPage(page));
   },
 });
