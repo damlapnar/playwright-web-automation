@@ -7,12 +7,21 @@ const { firstName, lastName, postalCode } = shippingInfo.valid;
 test.describe('Checkout Flow', () => {
   test('should complete checkout with valid shipping info', async ({ cartPage, page }) => {
     const checkout = new CheckoutPage(page);
-    await cartPage.proceedToCheckout();
-    await checkout.fillShippingInfo(firstName, lastName, postalCode);
-    await checkout.continue();
-    await expect(page).toHaveURL(/checkout-step-two/);
-    await checkout.finish();
-    await checkout.expectOrderComplete();
+
+    await test.step('proceed from cart to checkout', async () => {
+      await cartPage.proceedToCheckout();
+    });
+
+    await test.step('submit shipping information', async () => {
+      await checkout.fillShippingInfo(firstName, lastName, postalCode);
+      await checkout.continue();
+      await expect(page).toHaveURL(/checkout-step-two/);
+    });
+
+    await test.step('finish the order', async () => {
+      await checkout.finish();
+      await checkout.expectOrderComplete();
+    });
   });
 
   test('should show error when first name is missing', async ({ cartPage, page }) => {

@@ -25,8 +25,10 @@ export class ProductPage {
   }
 
   async expectVisible() {
-    await expect(this.productName).toBeVisible();
-    await expect(this.productPrice).toBeVisible();
-    await expect(this.productDescription).toBeVisible();
+    // Soft assertions: report on all three fields even if one is missing,
+    // instead of stopping at the first failure.
+    await expect.soft(this.productName).toBeVisible();
+    await expect.soft(this.productPrice).toBeVisible();
+    await expect.soft(this.productDescription).toBeVisible();
   }
 }
