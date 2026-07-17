@@ -75,7 +75,9 @@ npm run allure:open
 
 ## CI/CD
 
-Tests run automatically on every push and pull request via GitHub Actions across all three browsers in parallel. Scheduled runs execute every weekday at 8 AM.
+Tests run automatically on every push and pull request via GitHub Actions across all three desktop browsers plus mobile Chrome/Safari in parallel. Scheduled runs execute every weekday at 8 AM.
+
+Each job's step summary reports pass/fail counts and flags any test that only passed after a retry, so instability that CI's `retries: 2` would otherwise silently absorb stays visible.
 
 ---
 
