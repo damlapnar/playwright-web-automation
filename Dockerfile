@@ -1,4 +1,4 @@
-FROM node:20-jammy
+FROM node:20-bookworm
 
 WORKDIR /app
 COPY package*.json ./
