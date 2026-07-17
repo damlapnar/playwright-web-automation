@@ -1,0 +1,36 @@
+name: Update Visual Snapshots
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Regenerate visual snapshots
+        run: npx playwright test tests/e2e/visual.spec.ts --project=${{ matrix.browser }} --update-snapshots
+        env:
+          BASE_URL: https://www.saucedemo.com
+
+      - name: Upload snapshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-snapshots-${{ matrix.browser }}
+          path: tests/e2e/visual.spec.ts-snapshots/

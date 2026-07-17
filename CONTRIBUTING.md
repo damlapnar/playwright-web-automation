@@ -18,6 +18,28 @@ npm test
 npm run test:headed
 ```
 
+## Visual Regression Tests
+
+`tests/e2e/visual.spec.ts` compares pages against baseline screenshots via
+`toHaveScreenshot()`. Baselines are OS- and browser-specific (e.g.
+`login-page-chromium-linux.png`), so macOS-generated baselines won't match
+in CI (which runs on `ubuntu-latest`).
+
+To (re)generate the Linux baselines after adding or intentionally changing a
+page under visual test:
+
+1. Run the **Update Visual Snapshots** workflow manually from the Actions tab
+   (`workflow_dispatch`).
+2. Download the `visual-snapshots-<browser>` artifacts.
+3. Copy their contents into `tests/e2e/visual.spec.ts-snapshots/`.
+4. Review the diffs and commit.
+
+To update your local macOS baselines instead, run:
+
+```bash
+npx playwright test tests/e2e/visual.spec.ts --update-snapshots
+```
+
 ## Guidelines
 
 - Follow the existing code style and naming conventions
