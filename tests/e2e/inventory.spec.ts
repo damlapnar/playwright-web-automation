@@ -1,5 +1,5 @@
-import { authenticatedTest as test, expect } from '../../fixtures/auth.fixture';
-import { products } from '../../utils/testData';
+import { authenticatedTest as test, expect } from '@fixtures/auth.fixture';
+import { products } from '@utils/testData';
 
 test.describe('Inventory Page', () => {
   test('should display all products', async ({ inventoryPage }) => {

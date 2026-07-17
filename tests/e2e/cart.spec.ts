@@ -1,6 +1,6 @@
-import { authenticatedTest, cartTest, expect } from '../../fixtures/auth.fixture';
-import { CartPage } from '../../pages/CartPage';
-import { products } from '../../utils/testData';
+import { authenticatedTest, cartTest, expect } from '@fixtures/auth.fixture';
+import { CartPage } from '@pages/CartPage';
+import { products } from '@utils/testData';
 
 cartTest.describe('Cart', () => {
   cartTest('should reflect added items', async ({ cartPage }) => {

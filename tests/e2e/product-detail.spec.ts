@@ -1,5 +1,5 @@
-import { authenticatedTest as test, expect } from '../../fixtures/auth.fixture';
-import { ProductPage } from '../../pages/ProductPage';
+import { authenticatedTest as test, expect } from '@fixtures/auth.fixture';
+import { ProductPage } from '@pages/ProductPage';
 
 test.describe('Product Detail Page', () => {
   test.beforeEach(async ({ page, inventoryPage: _ }) => {

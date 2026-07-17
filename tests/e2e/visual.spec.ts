@@ -1,6 +1,6 @@
-import { test, authenticatedTest, cartTest, expect } from '../../fixtures/auth.fixture';
-import { CheckoutPage } from '../../pages/CheckoutPage';
-import { users, shippingInfo } from '../../utils/testData';
+import { test, authenticatedTest, cartTest, expect } from '@fixtures/auth.fixture';
+import { CheckoutPage } from '@pages/CheckoutPage';
+import { users, shippingInfo } from '@utils/testData';
 
 const { firstName, lastName, postalCode } = shippingInfo.valid;
 

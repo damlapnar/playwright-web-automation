@@ -1,5 +1,5 @@
-import { test, expect } from '../../fixtures/auth.fixture';
-import { users } from '../../utils/testData';
+import { test, expect } from '@fixtures/auth.fixture';
+import { users } from '@utils/testData';
 
 test.describe('Login Flow', () => {
   test.beforeEach(async ({ loginPage }) => {

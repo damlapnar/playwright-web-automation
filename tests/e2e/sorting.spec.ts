@@ -1,4 +1,4 @@
-import { authenticatedTest as test, expect } from '../../fixtures/auth.fixture';
+import { authenticatedTest as test, expect } from '@fixtures/auth.fixture';
 
 test.describe('Product Sorting', () => {
   test('displays all 6 products', async ({ inventoryPage }) => {

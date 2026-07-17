@@ -1,5 +1,5 @@
-import { authenticatedTest as test, expect } from '../../fixtures/auth.fixture';
-import { products } from '../../utils/testData';
+import { authenticatedTest as test, expect } from '@fixtures/auth.fixture';
+import { products } from '@utils/testData';
 
 test.describe('Navigation & Header', () => {
   test('should display burger menu and cart icon', async ({ page, inventoryPage: _ }) => {

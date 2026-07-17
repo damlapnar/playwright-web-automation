@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { test, authenticatedTest, cartTest, expect } from '../../fixtures/auth.fixture';
+import { test, authenticatedTest, cartTest, expect } from '@fixtures/auth.fixture';
 
 // saucedemo.com is a third-party demo site with known moderate-impact
 // structural issues (no <main> landmark, no h1, content outside landmarks)
