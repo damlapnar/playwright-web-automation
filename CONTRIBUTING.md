@@ -15,7 +15,15 @@ npx playwright install
 
 ```bash
 npm test
+
+# Headed mode (see the browser)
 npm run test:headed
+
+# Step through a test in the Playwright inspector
+npm run test:debug
+
+# Interactive UI mode (time-travel through steps, watch mode)
+npm run test:ui
 ```
 
 ## Visual Regression Tests

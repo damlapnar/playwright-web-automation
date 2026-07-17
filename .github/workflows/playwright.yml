@@ -47,16 +47,9 @@ jobs:
 
       - name: Write step summary
         if: always()
-        run: |
-          if [ -f test-results/results.json ]; then
-            PASSED=$(cat test-results/results.json | python3 -c "import sys,json; r=json.load(sys.stdin); print(sum(1 for s in r.get('suites',[]) for t in s.get('specs',[]) if t.get('ok')))" 2>/dev/null || echo "?")
-            FAILED=$(cat test-results/results.json | python3 -c "import sys,json; r=json.load(sys.stdin); print(sum(1 for s in r.get('suites',[]) for t in s.get('specs',[]) if not t.get('ok')))" 2>/dev/null || echo "?")
-            echo "## Playwright Results — ${{ matrix.project }}" >> $GITHUB_STEP_SUMMARY
-            echo "| Status | Count |" >> $GITHUB_STEP_SUMMARY
-            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-            echo "| ✅ Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
-            echo "| ❌ Failed | $FAILED |" >> $GITHUB_STEP_SUMMARY
-          fi
+        run: python3 .github/scripts/write-step-summary.py
+        env:
+          MATRIX_PROJECT: ${{ matrix.project }}
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
