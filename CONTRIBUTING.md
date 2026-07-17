@@ -81,6 +81,25 @@ Both run in a dedicated CI `lint` job, in parallel with the browser test
 matrix (not gating it — a lint failure won't stop the test matrix from
 also reporting its own results).
 
+## Scaling CI with Sharding
+
+The current suite (220 tests across 5 projects) runs comfortably in one job
+per project. If it grows large enough that a single project's run becomes
+the bottleneck, Playwright can split a project's tests across multiple
+machines:
+
+```bash
+npx playwright test --project=chromium --shard=1/3
+npx playwright test --project=chromium --shard=2/3
+npx playwright test --project=chromium --shard=3/3
+```
+
+Each shard runs a disjoint subset of that project's tests; wire it up as an
+extra matrix dimension (`shard: [1, 2, 3]`) crossed with `project` in
+`.github/workflows/playwright.yml` when it's actually needed — don't add it
+preemptively for a suite this size, it would only add job-scheduling
+overhead for no real wall-clock gain.
+
 ## Guidelines
 
 - Follow the existing code style and naming conventions
