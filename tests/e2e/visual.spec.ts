@@ -1,5 +1,8 @@
 import { test, authenticatedTest, cartTest, expect } from '../../fixtures/auth.fixture';
 import { CheckoutPage } from '../../pages/CheckoutPage';
+import { users, shippingInfo } from '../../utils/testData';
+
+const { firstName, lastName, postalCode } = shippingInfo.valid;
 
 test.describe('Visual Regression', () => {
   test('login page', async ({ loginPage, page }) => {
@@ -9,7 +12,7 @@ test.describe('Visual Regression', () => {
 
   test('login page with error', async ({ loginPage, page }) => {
     await loginPage.navigate();
-    await loginPage.login('invalid_user', 'wrong_password');
+    await loginPage.login(users.invalid.username, users.invalid.password);
     await expect(page).toHaveScreenshot('login-page-error.png');
   });
 });
@@ -33,7 +36,7 @@ authenticatedTest.describe('Visual Regression (authenticated)', () => {
   cartTest('checkout complete', async ({ cartPage, page }) => {
     const checkout = new CheckoutPage(page);
     await cartPage.proceedToCheckout();
-    await checkout.fillShippingInfo('Damla', 'Pinar', '10001');
+    await checkout.fillShippingInfo(firstName, lastName, postalCode);
     await checkout.continue();
     await checkout.finish();
     await expect(page).toHaveScreenshot('checkout-complete.png');

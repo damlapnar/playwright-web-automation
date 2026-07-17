@@ -2,6 +2,7 @@ import { test as base } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { InventoryPage } from '../pages/InventoryPage';
 import { CartPage } from '../pages/CartPage';
+import { users, products } from '../utils/testData';
 
 type Pages = {
   loginPage: LoginPage;
@@ -21,10 +22,7 @@ export const authenticatedTest = base.extend<Pages>({
   loginPage: async ({ page }, use) => {
     const loginPage = new LoginPage(page);
     await loginPage.navigate();
-    await loginPage.login(
-      process.env.TEST_USERNAME || 'standard_user',
-      process.env.TEST_PASSWORD || 'secret_sauce'
-    );
+    await loginPage.login(users.standard.username, users.standard.password);
     // Wait for navigation to inventory page to complete before handing off
     await page.waitForURL('**/inventory.html');
     await use(loginPage);
@@ -41,7 +39,7 @@ type CartPages = Pages & { cartPage: CartPage };
 // starting point for cart, checkout, and page-level a11y/visual specs.
 export const cartTest = authenticatedTest.extend<CartPages>({
   cartPage: async ({ inventoryPage, page }, use) => {
-    await inventoryPage.addItemToCart('Sauce Labs Backpack');
+    await inventoryPage.addItemToCart(products.backpack);
     await inventoryPage.goToCart();
     await use(new CartPage(page));
   },

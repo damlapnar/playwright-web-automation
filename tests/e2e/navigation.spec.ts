@@ -1,4 +1,5 @@
 import { authenticatedTest as test, expect } from '../../fixtures/auth.fixture';
+import { products } from '../../utils/testData';
 
 test.describe('Navigation & Header', () => {
   test('should display burger menu and cart icon', async ({ page, inventoryPage: _ }) => {
@@ -27,7 +28,7 @@ test.describe('Navigation & Header', () => {
   });
 
   test('should reset cart via sidebar', async ({ inventoryPage, page }) => {
-    await inventoryPage.addItemToCart('Sauce Labs Backpack');
+    await inventoryPage.addItemToCart(products.backpack);
     await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
     await page.locator('#react-burger-menu-btn').click();
     await page.locator('#reset_sidebar_link').click();
