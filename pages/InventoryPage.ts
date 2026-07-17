@@ -11,7 +11,7 @@ export class InventoryPage {
     this.page = page;
     this.productList = page.locator('.inventory_item');
     this.cartBadge = page.locator('.shopping_cart_badge');
-    this.sortDropdown = page.locator('[data-test="product-sort-container"]');
+    this.sortDropdown = page.locator('select.product_sort_container');
     this.cartButton = page.locator('.shopping_cart_link');
   }
 
