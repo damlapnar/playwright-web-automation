@@ -14,7 +14,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
+        include:
+          - project: chromium
+            installBrowser: chromium
+          - project: firefox
+            installBrowser: firefox
+          - project: webkit
+            installBrowser: webkit
+          - project: mobile-chrome
+            installBrowser: chromium
+          - project: mobile-safari
+            installBrowser: webkit
 
     steps:
       - uses: actions/checkout@v4
@@ -28,10 +38,10 @@ jobs:
         run: npm install
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps ${{ matrix.browser }}
+        run: npx playwright install --with-deps ${{ matrix.installBrowser }}
 
       - name: Run Playwright tests
-        run: npx playwright test --project=${{ matrix.browser }}
+        run: npx playwright test --project=${{ matrix.project }}
         env:
           BASE_URL: https://www.saucedemo.com
 
@@ -41,7 +51,7 @@ jobs:
           if [ -f test-results/results.json ]; then
             PASSED=$(cat test-results/results.json | python3 -c "import sys,json; r=json.load(sys.stdin); print(sum(1 for s in r.get('suites',[]) for t in s.get('specs',[]) if t.get('ok')))" 2>/dev/null || echo "?")
             FAILED=$(cat test-results/results.json | python3 -c "import sys,json; r=json.load(sys.stdin); print(sum(1 for s in r.get('suites',[]) for t in s.get('specs',[]) if not t.get('ok')))" 2>/dev/null || echo "?")
-            echo "## Playwright Results — ${{ matrix.browser }}" >> $GITHUB_STEP_SUMMARY
+            echo "## Playwright Results — ${{ matrix.project }}" >> $GITHUB_STEP_SUMMARY
             echo "| Status | Count |" >> $GITHUB_STEP_SUMMARY
             echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
             echo "| ✅ Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
@@ -52,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report-${{ matrix.browser }}
+          name: playwright-report-${{ matrix.project }}
           path: |
             playwright-report/
             test-results/
@@ -67,7 +77,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: allure-report-${{ matrix.browser }}
+          name: allure-report-${{ matrix.project }}
           path: allure-report/
           if-no-files-found: ignore
           retention-days: 30

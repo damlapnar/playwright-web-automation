@@ -10,6 +10,8 @@
     "test:chrome": "playwright test --project=chromium",
     "test:firefox": "playwright test --project=firefox",
     "test:safari": "playwright test --project=webkit",
+    "test:mobile-chrome": "playwright test --project=mobile-chrome",
+    "test:mobile-safari": "playwright test --project=mobile-safari",
     "test:api": "playwright test tests/api",
     "report": "playwright show-report",
     "allure:generate": "allure generate allure-results --clean -o allure-report",

@@ -55,6 +55,10 @@ npm run test:chrome
 npm run test:firefox
 npm run test:safari
 
+# Mobile viewports (login/inventory/cart flows only)
+npm run test:mobile-chrome
+npm run test:mobile-safari
+
 # API tests only
 npm run test:api
 

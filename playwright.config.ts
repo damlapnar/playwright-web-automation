@@ -25,5 +25,18 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'firefox',  use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit',   use: { ...devices['Desktop Safari'] } },
+    // Mobile projects cover core flows only (login/inventory/cart), not the
+    // full suite — running visual/a11y/checkout there too would double the
+    // baseline and maintenance burden for marginal extra coverage.
+    {
+      name: 'mobile-chrome',
+      use: { ...devices['Pixel 5'] },
+      testMatch: /(login|inventory|cart)\.spec\.ts/,
+    },
+    {
+      name: 'mobile-safari',
+      use: { ...devices['iPhone 13'] },
+      testMatch: /(login|inventory|cart)\.spec\.ts/,
+    },
   ],
 });
