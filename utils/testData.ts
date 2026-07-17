@@ -11,6 +11,16 @@ export const users = {
     username: 'invalid_user',
     password: 'wrong_password',
   },
+  // saucedemo's built-in demo accounts for intentionally broken behavior —
+  // stable, permanent quirks, not regressions we introduced.
+  problem: {
+    username: 'problem_user',
+    password: 'secret_sauce',
+  },
+  performanceGlitch: {
+    username: 'performance_glitch_user',
+    password: 'secret_sauce',
+  },
 };
 
 export const products = {
