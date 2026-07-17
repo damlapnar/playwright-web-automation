@@ -15,10 +15,13 @@ End-to-end web automation framework built with Playwright and TypeScript. Featur
 - **API Testing** — built-in Playwright request context
 - **Parallel Execution** — configurable worker count
 - **CI/CD** — GitHub Actions with matrix strategy per browser
-- **Reporting** — HTML + JUnit reports with screenshots and video on failure, plus Allure reports
+- **Reporting** — HTML, JSON, and Allure reports with screenshots and video on failure
 - **Visual Regression** — screenshot comparisons for key pages
 - **Accessibility** — automated axe-core checks for serious/critical violations
 - **Linting & Formatting** — ESLint (with Playwright-specific rules) and Prettier, enforced in CI
+- **Auth State Reuse** — logs in once per worker via storageState instead of once per test
+- **Network Interception** — examples of blocking/delaying requests with `page.route()`
+- **Dependency Automation** — Dependabot keeps npm and GitHub Actions dependencies current
 
 ## Project Structure
 
@@ -29,8 +32,12 @@ playwright-web-automation/
 │   ├── e2e/             # End-to-end UI tests
 │   └── api/             # API tests
 ├── fixtures/            # Custom test fixtures
-├── utils/               # Helper functions
-├── .github/workflows/   # CI/CD pipeline
+├── utils/               # Shared test data
+├── .github/
+│   ├── workflows/       # CI/CD pipelines
+│   └── dependabot.yml
+├── global-setup.ts      # Fails fast if BASE_URL is unreachable
+├── eslint.config.js
 └── playwright.config.ts
 ```
 
@@ -90,18 +97,21 @@ Playwright's async API and built-in auto-waiting eliminate flaky sleeps. Native 
 
 ### Design Decisions
 
-| Decision             | Choice                       | Rationale                                                                                       |
-| -------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------- |
-| Fixture pattern      | Custom `authenticatedTest`   | Keeps login state DRY; Playwright lazily instantiates only what each test requests              |
-| Page Object Model    | Typed POMs per page          | Encapsulates selectors; tests break at the POM layer not the spec layer                         |
-| API layer separation | `tests/api/` vs `tests/e2e/` | API contract tests run faster and in parallel; E2E tests validate full user flows               |
-| Parallel execution   | Workers per browser          | GitHub Actions matrix runs all browsers simultaneously; fail-fast=false catches all regressions |
+| Decision               | Choice                                  | Rationale                                                                                              |
+| ---------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Fixture pattern        | Custom `authenticatedTest` / `cartTest` | Keeps setup DRY; Playwright lazily instantiates only what each test requests                           |
+| Auth reuse             | Worker-scoped `storageState`            | Logs in once per worker instead of once per test — full local suite dropped from ~23s to ~16s          |
+| Page Object Model      | Typed POMs per page                     | Encapsulates selectors; tests break at the POM layer not the spec layer                                |
+| API layer separation   | `tests/api/` vs `tests/e2e/`            | API contract tests run faster and in parallel; E2E tests validate full user flows                      |
+| Parallel execution     | Workers per browser project             | GitHub Actions matrix runs all 5 projects simultaneously; fail-fast=false catches all regressions      |
+| Path aliases           | `@pages/*`, `@fixtures/*`, `@utils/*`   | Playwright resolves tsconfig paths natively; avoids `../../` chains                                    |
+| Docker browser install | `playwright install` at build time      | Browsers always match whatever `@playwright/test` resolves to — can't silently drift like a pinned tag |
 
 ### Test Pyramid
 
 ```
         ┌──────────────────┐
-        │   E2E (Playwright)│  ← 6 spec files, full browser
+        │   E2E (Playwright)│  ← 10 spec files, full browser
         ├──────────────────┤
         │   API Tests       │  ← 2 spec files, HTTP only
         └──────────────────┘
