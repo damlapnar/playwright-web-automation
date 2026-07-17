@@ -26,7 +26,7 @@ export const authenticatedTest = base.extend<Pages>({
     );
     await use(loginPage);
   },
-  inventoryPage: async ({ page }, use) => {
+  inventoryPage: async ({ page, loginPage }, use) => {
     await use(new InventoryPage(page));
   },
 });
