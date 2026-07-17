@@ -12,8 +12,9 @@ export default defineConfig({
         ['html', { open: 'never' }],
         ['json', { outputFile: 'test-results/results.json' }],
         ['github'],
+        ['allure-playwright', { outputFolder: 'allure-results' }],
       ]
-    : [['list'], ['html']],
+    : [['list'], ['html'], ['allure-playwright', { outputFolder: 'allure-results' }]],
   use: {
     baseURL: process.env.BASE_URL || 'https://www.saucedemo.com',
     trace: 'on-first-retry',

@@ -1,5 +1,4 @@
-import { test, authenticatedTest, expect } from '../../fixtures/auth.fixture';
-import { CartPage } from '../../pages/CartPage';
+import { test, authenticatedTest, cartTest, expect } from '../../fixtures/auth.fixture';
 import { CheckoutPage } from '../../pages/CheckoutPage';
 
 test.describe('Visual Regression', () => {
@@ -22,26 +21,18 @@ authenticatedTest.describe('Visual Regression (authenticated)', () => {
     });
   });
 
-  authenticatedTest('cart page with item', async ({ inventoryPage, page }) => {
-    await inventoryPage.addItemToCart('Sauce Labs Backpack');
-    await inventoryPage.goToCart();
+  cartTest('cart page with item', async ({ cartPage: _c, page }) => {
     await expect(page).toHaveScreenshot('cart-page.png');
   });
 
-  authenticatedTest('checkout step one', async ({ inventoryPage, page }) => {
-    await inventoryPage.addItemToCart('Sauce Labs Backpack');
-    await inventoryPage.goToCart();
-    const cart = new CartPage(page);
-    await cart.proceedToCheckout();
+  cartTest('checkout step one', async ({ cartPage, page }) => {
+    await cartPage.proceedToCheckout();
     await expect(page).toHaveScreenshot('checkout-step-one.png');
   });
 
-  authenticatedTest('checkout complete', async ({ inventoryPage, page }) => {
-    await inventoryPage.addItemToCart('Sauce Labs Backpack');
-    await inventoryPage.goToCart();
-    const cart = new CartPage(page);
+  cartTest('checkout complete', async ({ cartPage, page }) => {
     const checkout = new CheckoutPage(page);
-    await cart.proceedToCheckout();
+    await cartPage.proceedToCheckout();
     await checkout.fillShippingInfo('Damla', 'Pinar', '10001');
     await checkout.continue();
     await checkout.finish();

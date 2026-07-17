@@ -1,6 +1,7 @@
 import { test as base } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { InventoryPage } from '../pages/InventoryPage';
+import { CartPage } from '../pages/CartPage';
 
 type Pages = {
   loginPage: LoginPage;
@@ -31,6 +32,18 @@ export const authenticatedTest = base.extend<Pages>({
   // depends on loginPage so login and navigation both complete first
   inventoryPage: async ({ page, loginPage: _l }, use) => {
     await use(new InventoryPage(page));
+  },
+});
+
+type CartPages = Pages & { cartPage: CartPage };
+
+// Adds a Sauce Labs Backpack and navigates to the cart page — the common
+// starting point for cart, checkout, and page-level a11y/visual specs.
+export const cartTest = authenticatedTest.extend<CartPages>({
+  cartPage: async ({ inventoryPage, page }, use) => {
+    await inventoryPage.addItemToCart('Sauce Labs Backpack');
+    await inventoryPage.goToCart();
+    await use(new CartPage(page));
   },
 });
 

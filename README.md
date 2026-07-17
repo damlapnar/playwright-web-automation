@@ -15,7 +15,9 @@ End-to-end web automation framework built with Playwright and TypeScript. Featur
 - **API Testing** — built-in Playwright request context
 - **Parallel Execution** — configurable worker count
 - **CI/CD** — GitHub Actions with matrix strategy per browser
-- **Reporting** — HTML + JUnit reports with screenshots and video on failure
+- **Reporting** — HTML + JUnit reports with screenshots and video on failure, plus Allure reports
+- **Visual Regression** — screenshot comparisons for key pages
+- **Accessibility** — automated axe-core checks for serious/critical violations
 
 ## Project Structure
 
@@ -61,6 +63,10 @@ npm run test:debug
 
 # View HTML report
 npm run report
+
+# Generate + open Allure report (after a test run)
+npm run allure:generate
+npm run allure:open
 ```
 
 ## CI/CD
