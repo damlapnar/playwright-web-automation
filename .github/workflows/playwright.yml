@@ -74,7 +74,7 @@ jobs:
           MATRIX_PROJECT: ${{ matrix.project }}
 
       - name: Upload test report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report-${{ matrix.project }}
@@ -89,7 +89,7 @@ jobs:
         run: npx allure generate allure-results --clean -o allure-report
 
       - name: Upload Allure report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: allure-report-${{ matrix.project }}
