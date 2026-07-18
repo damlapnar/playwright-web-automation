@@ -21,6 +21,10 @@ export const users = {
     username: 'performance_glitch_user',
     password: 'secret_sauce',
   },
+  errorProne: {
+    username: 'error_user',
+    password: 'secret_sauce',
+  },
 };
 
 export const products = {

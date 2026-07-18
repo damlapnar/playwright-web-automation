@@ -40,4 +40,21 @@ test.describe('Special Demo Accounts', () => {
 
     expect(glitchMs).toBeGreaterThan(standardMs * 2);
   });
+
+  test('error_user ignores the sort dropdown selection', async ({ loginPage, page }) => {
+    await loginPage.navigate();
+    await loginPage.login(users.errorProne.username, users.errorProne.password);
+    await expect(page).toHaveURL(/inventory/);
+
+    const defaultOrder = await page.locator('.inventory_item_name').allTextContents();
+    await page.locator('select.product_sort_container').selectOption('za');
+    // Comparing against the earlier read, not a static expected value —
+    // toHaveText() can't express that, so a raw read is the right tool here.
+    // eslint-disable-next-line playwright/prefer-web-first-assertions
+    const afterSortAttempt = await page.locator('.inventory_item_name').allTextContents();
+
+    // The dropdown visibly changes, but the list order never actually
+    // updates for this account — a real, stable saucedemo demo bug.
+    expect(afterSortAttempt).toEqual(defaultOrder);
+  });
 });
