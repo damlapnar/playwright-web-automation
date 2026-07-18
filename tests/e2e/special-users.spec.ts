@@ -57,4 +57,19 @@ test.describe('Special Demo Accounts', () => {
     // updates for this account — a real, stable saucedemo demo bug.
     expect(afterSortAttempt).toEqual(defaultOrder);
   });
+
+  test('visual_user renders an oversized cart icon', async ({ loginPage, page }) => {
+    await loginPage.navigate();
+    await loginPage.login(users.visual.username, users.visual.password);
+    await expect(page).toHaveURL(/inventory/);
+
+    const cartIconSize = await page
+      .locator('.shopping_cart_link')
+      .evaluate((el) => el.getBoundingClientRect().width);
+
+    // standard_user's cart icon is exactly 40x40px; visual_user's is a
+    // deliberately different ~42px — a real, stable layout regression this
+    // demo account exists to exercise.
+    expect(cartIconSize).toBeGreaterThan(41);
+  });
 });

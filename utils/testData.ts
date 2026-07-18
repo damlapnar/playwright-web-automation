@@ -25,6 +25,10 @@ export const users = {
     username: 'error_user',
     password: 'secret_sauce',
   },
+  visual: {
+    username: 'visual_user',
+    password: 'secret_sauce',
+  },
 };
 
 export const products = {
