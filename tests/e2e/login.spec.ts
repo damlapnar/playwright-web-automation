@@ -6,7 +6,7 @@ test.describe('Login Flow', () => {
     await loginPage.navigate();
   });
 
-  test('should login with valid credentials', async ({ loginPage, page }) => {
+  test('should login with valid credentials', { tag: '@smoke' }, async ({ loginPage, page }) => {
     await loginPage.login(users.standard.username, users.standard.password);
     await expect(page).toHaveURL(/inventory/);
   });

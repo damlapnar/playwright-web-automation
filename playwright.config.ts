@@ -24,9 +24,13 @@ export default defineConfig({
     video: 'on-first-retry',
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    // API tests hit third-party HTTP APIs directly — no browser involved —
+    // so they run once here instead of redundantly under every browser
+    // project (which would triple their runtime for zero extra coverage).
+    { name: 'api', testDir: './tests/api' },
+    { name: 'chromium', testIgnore: /tests[\\/]api[\\/]/, use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', testIgnore: /tests[\\/]api[\\/]/, use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', testIgnore: /tests[\\/]api[\\/]/, use: { ...devices['Desktop Safari'] } },
     // Mobile projects cover core flows only (login/inventory/cart), not the
     // full suite — running visual/a11y/checkout there too would double the
     // baseline and maintenance burden for marginal extra coverage.

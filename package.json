@@ -6,6 +6,7 @@
     "node": ">=20.9.0"
   },
   "scripts": {
+    "prepare": "husky",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
@@ -15,7 +16,8 @@
     "test:safari": "playwright test --project=webkit",
     "test:mobile-chrome": "playwright test --project=mobile-chrome",
     "test:mobile-safari": "playwright test --project=mobile-safari",
-    "test:api": "playwright test tests/api",
+    "test:api": "playwright test --project=api",
+    "test:smoke": "playwright test --grep @smoke",
     "report": "playwright show-report",
     "allure:generate": "allure generate allure-results --clean -o allure-report",
     "allure:open": "allure open allure-report",
@@ -36,8 +38,19 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-playwright": "^2.10.5",
     "globals": "^17.7.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
     "prettier": "^3.9.5",
     "typescript": "^5.0.0",
     "typescript-eslint": "^8.64.0"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{md,json,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

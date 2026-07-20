@@ -29,4 +29,12 @@ export class CartPage {
   async expectItemInCart(itemName: string) {
     await expect(this.page.locator('.cart_item', { hasText: itemName })).toBeVisible();
   }
+
+  async expectItemCount(count: number) {
+    await expect(this.cartItems).toHaveCount(count);
+  }
+
+  async expectEmpty() {
+    await this.expectItemCount(0);
+  }
 }

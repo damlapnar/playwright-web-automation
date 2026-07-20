@@ -6,6 +6,7 @@ export class ProductPage {
   readonly productDescription: Locator;
   readonly productPrice: Locator;
   readonly addToCartButton: Locator;
+  readonly removeFromCartButton: Locator;
   readonly backButton: Locator;
 
   constructor(page: Page) {
@@ -14,11 +15,15 @@ export class ProductPage {
     this.productDescription = page.locator('.inventory_details_desc');
     this.productPrice = page.locator('.inventory_details_price');
     this.addToCartButton = page.locator('[data-test^="add-to-cart"]');
+    this.removeFromCartButton = page.locator('[data-test^="remove"]');
     this.backButton = page.locator('[data-test="back-to-products"]');
   }
 
   async addToCart() {
     await this.addToCartButton.click();
+  }
+  async removeFromCart() {
+    await this.removeFromCartButton.click();
   }
   async goBack() {
     await this.backButton.click();

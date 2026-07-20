@@ -2,12 +2,12 @@ import { authenticatedTest as test, expect } from '@fixtures/auth.fixture';
 import { products } from '@utils/testData';
 
 test.describe('Inventory Page', () => {
-  test('should display all products', async ({ inventoryPage }) => {
+  test('should display all products', { tag: '@smoke' }, async ({ inventoryPage }) => {
     const count = await inventoryPage.getProductCount();
     expect(count).toBe(6);
   });
 
-  test('should add item to cart', async ({ inventoryPage }) => {
+  test('should add item to cart', { tag: '@smoke' }, async ({ inventoryPage }) => {
     await inventoryPage.addItemToCart(products.backpack);
     await inventoryPage.expectCartCount(1);
   });
@@ -18,15 +18,14 @@ test.describe('Inventory Page', () => {
     await inventoryPage.expectCartCount(2);
   });
 
-  test('should sort products A to Z', async ({ inventoryPage, page }) => {
-    await inventoryPage.sortBy('az');
-    const firstItem = page.locator('.inventory_item_name').first();
-    await expect(firstItem).toHaveText(products.backpack);
-  });
+  // Exhaustive sort coverage (az/za/lohi/hilo, switching between them) lives
+  // in sorting.spec.ts — kept out of here to avoid duplicating that suite.
 
-  test('should sort products by price low to high', async ({ inventoryPage, page }) => {
-    await inventoryPage.sortBy('lohi');
-    const firstItem = page.locator('.inventory_item_price').first();
-    await expect(firstItem).toHaveText('$7.99');
+  test('should remove item from cart', async ({ inventoryPage }) => {
+    await inventoryPage.addItemToCart(products.backpack);
+    await inventoryPage.expectCartCount(1);
+    await inventoryPage.removeItemFromCart(products.backpack);
+    // The badge element doesn't render "0" — it's absent entirely at zero.
+    await expect(inventoryPage.cartBadge).toBeHidden();
   });
 });

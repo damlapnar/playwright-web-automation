@@ -52,13 +52,20 @@ npx playwright test tests/e2e/visual.spec.ts --update-snapshots
 
 `fixtures/auth.fixture.ts` exports three test objects:
 
-- `test` — no login. Use for the login page itself (`login.spec.ts`).
+- `test` — no login. Exposes `loginPage`/`inventoryPage`. Use for the login
+  page itself (`login.spec.ts`) and unauthenticated flows
+  (`route-protection.spec.ts`).
 - `authenticatedTest` — logs in through the real UI **once per worker**
   (not once per test) via a worker-scoped `authStorageState` fixture, then
   hands each test a fresh context/page already loaded with that
   storageState. Its `page` fixture navigates straight to `/inventory.html`.
-- `cartTest` — extends `authenticatedTest` and additionally adds a Sauce
-  Labs Backpack to the cart before the test body runs, exposing `cartPage`.
+  Exposes `loginPage`, `inventoryPage`, `navigationPage`, `productPage`,
+  `checkoutPage`, and an unseeded `cartPage`.
+- `cartTest` — extends `authenticatedTest` by overriding the `cartPage`
+  fixture: it adds a Sauce Labs Backpack and navigates to the cart page
+  before the test body runs, then hands back the same `cartPage` instance.
+  Use `authenticatedTest` directly (not `cartTest`) for tests that need
+  custom cart seeding, e.g. multiple items or an intentionally empty cart.
 
 Because Playwright fixtures are lazy, a fixture only runs if something in
 the test actually requests it. If your test needs a fixture's side effect
@@ -81,9 +88,21 @@ Both run in a dedicated CI `lint` job, in parallel with the browser test
 matrix (not gating it — a lint failure won't stop the test matrix from
 also reporting its own results).
 
+## Pre-commit Hooks
+
+`npm install` wires up a Husky pre-commit hook (via the `prepare` script)
+that runs `lint-staged` on every commit: `eslint --fix` + `prettier --write`
+on staged `*.ts` files, and `prettier --write` on staged
+`*.{md,json,yml,yaml}` files. This catches most lint/format issues locally,
+before the CI `lint` job would otherwise catch them.
+
+If you need to bypass it for a specific commit (rare — e.g. a WIP commit on
+a private branch), use `git commit --no-verify`. This is discouraged for
+anything headed toward a PR, since CI enforces the same checks anyway.
+
 ## Scaling CI with Sharding
 
-The current suite (220 tests across 5 projects) runs comfortably in one job
+The current suite (282 tests across 6 projects) runs comfortably in one job
 per project. If it grows large enough that a single project's run becomes
 the bottleneck, Playwright can split a project's tests across multiple
 machines:

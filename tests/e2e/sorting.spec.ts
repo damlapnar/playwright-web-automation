@@ -1,9 +1,7 @@
 import { authenticatedTest as test, expect } from '@fixtures/auth.fixture';
 
 test.describe('Product Sorting', () => {
-  test('displays all 6 products', async ({ inventoryPage }) => {
-    expect(await inventoryPage.getProductCount()).toBe(6);
-  });
+  // "displays all N products" lives in inventory.spec.ts — not duplicated here.
 
   test('sort A–Z orders names alphabetically', async ({ inventoryPage, page }) => {
     await inventoryPage.sortBy('az');

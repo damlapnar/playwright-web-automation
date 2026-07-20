@@ -1,5 +1,4 @@
 import { test, authenticatedTest, cartTest, expect } from '@fixtures/auth.fixture';
-import { CheckoutPage } from '@pages/CheckoutPage';
 import { users, shippingInfo } from '@utils/testData';
 
 const { firstName, lastName, postalCode } = shippingInfo.valid;
@@ -33,12 +32,11 @@ authenticatedTest.describe('Visual Regression (authenticated)', () => {
     await expect(page).toHaveScreenshot('checkout-step-one.png');
   });
 
-  cartTest('checkout complete', async ({ cartPage, page }) => {
-    const checkout = new CheckoutPage(page);
+  cartTest('checkout complete', async ({ cartPage, checkoutPage, page }) => {
     await cartPage.proceedToCheckout();
-    await checkout.fillShippingInfo(firstName, lastName, postalCode);
-    await checkout.continue();
-    await checkout.finish();
+    await checkoutPage.fillShippingInfo(firstName, lastName, postalCode);
+    await checkoutPage.continue();
+    await checkoutPage.finish();
     await expect(page).toHaveScreenshot('checkout-complete.png');
   });
 });

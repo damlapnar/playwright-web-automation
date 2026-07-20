@@ -13,6 +13,7 @@ with open(RESULTS_PATH) as f:
 
 passed = failed = 0
 flaky = []
+failed_titles = []
 
 
 def walk(suite):
@@ -22,6 +23,7 @@ def walk(suite):
             passed += 1
         else:
             failed += 1
+            failed_titles.append(spec.get('title'))
         for t in spec.get('tests', []):
             if t.get('status') == 'flaky':
                 flaky.append(spec.get('title'))
@@ -41,6 +43,10 @@ with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
     out.write('| Status | Count |\n|--------|-------|\n')
     out.write(f'| ✅ Passed | {passed} |\n')
     out.write(f'| ❌ Failed | {failed} |\n')
+    if failed_titles:
+        out.write('\n**Failed tests:**\n')
+        for title in failed_titles:
+            out.write(f'- {title}\n')
     if flaky:
         out.write(f'| 🔁 Flaky (passed after retry) | {len(flaky)} |\n')
         out.write('\n**Flaky tests:**\n')

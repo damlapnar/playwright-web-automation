@@ -23,31 +23,34 @@ test.describe('Special Demo Accounts', () => {
     expect(uniqueSources.size).toBe(1);
   });
 
-  test('performance_glitch_user loads inventory noticeably slower than standard_user', async ({
+  test('performance_glitch_user login takes noticeably longer than normal', async ({
     loginPage,
     page,
   }) => {
-    async function timeLogin(username: string, password: string): Promise<number> {
-      await loginPage.navigate();
-      const start = Date.now();
-      await loginPage.login(username, password);
-      await page.waitForURL('**/inventory.html');
-      return Date.now() - start;
-    }
+    await loginPage.navigate();
+    const start = Date.now();
+    await loginPage.login(users.performanceGlitch.username, users.standard.password);
+    await page.waitForURL('**/inventory.html');
+    const elapsedMs = Date.now() - start;
 
-    const standardMs = await timeLogin(users.standard.username, users.standard.password);
-    const glitchMs = await timeLogin(users.performanceGlitch.username, users.standard.password);
-
-    expect(glitchMs).toBeGreaterThan(standardMs * 2);
+    // saucedemo bakes a fixed ~5s artificial delay into this account's
+    // login. An absolute floor is robust to CI load noise in a way that
+    // comparing against a second live standard_user login round trip
+    // isn't — and it cuts an entire extra login out of the test.
+    expect(elapsedMs).toBeGreaterThan(3000);
   });
 
-  test('error_user ignores the sort dropdown selection', async ({ loginPage, page }) => {
+  test('error_user ignores the sort dropdown selection', async ({
+    loginPage,
+    inventoryPage,
+    page,
+  }) => {
     await loginPage.navigate();
     await loginPage.login(users.errorProne.username, users.errorProne.password);
     await expect(page).toHaveURL(/inventory/);
 
     const defaultOrder = await page.locator('.inventory_item_name').allTextContents();
-    await page.locator('select.product_sort_container').selectOption('za');
+    await inventoryPage.sortBy('za');
     // Comparing against the earlier read, not a static expected value —
     // toHaveText() can't express that, so a raw read is the right tool here.
     // eslint-disable-next-line playwright/prefer-web-first-assertions

@@ -15,9 +15,26 @@ export class InventoryPage {
     this.cartButton = page.locator('.shopping_cart_link');
   }
 
+  private itemButton(itemName: string): Locator {
+    return this.page.locator('.inventory_item', { hasText: itemName }).locator('button');
+  }
+
   async addItemToCart(itemName: string) {
-    const item = this.page.locator('.inventory_item', { hasText: itemName });
-    await item.locator('button').click();
+    await this.itemButton(itemName).click();
+  }
+
+  // Sauce Labs toggles the same button between Add/Remove for a given item,
+  // so this is the identical click — the shared itemButton() helper keeps
+  // that locator logic in one place instead of duplicating it here.
+  async removeItemFromCart(itemName: string) {
+    await this.itemButton(itemName).click();
+  }
+
+  async openProduct(itemName: string) {
+    await this.page
+      .locator('.inventory_item', { hasText: itemName })
+      .locator('.inventory_item_name')
+      .click();
   }
 
   async sortBy(option: 'az' | 'za' | 'lohi' | 'hilo') {

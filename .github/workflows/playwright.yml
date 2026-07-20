@@ -11,6 +11,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -18,6 +19,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm install
@@ -31,12 +33,22 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
+      - name: Audit dependencies (critical only)
+        run: npm audit --audit-level=critical
+
+      - name: Dependency review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         include:
+          - project: api
+            installBrowser: ''
           - project: chromium
             installBrowser: chromium
           - project: firefox
@@ -55,11 +67,28 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm install
 
+      - name: Get installed Playwright version
+        if: matrix.installBrowser != ''
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        if: matrix.installBrowser != ''
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Playwright browsers
+        if: matrix.installBrowser != ''
+        # --with-deps always re-installs OS-level packages (fonts/libs) since
+        # those aren't cached, but it skips re-downloading browser binaries
+        # that the cache step above already restored at the matching version.
         run: npx playwright install --with-deps ${{ matrix.installBrowser }}
 
       - name: Run Playwright tests

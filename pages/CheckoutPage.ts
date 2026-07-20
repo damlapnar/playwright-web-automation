@@ -10,6 +10,9 @@ export class CheckoutPage {
   readonly cancelButton: Locator;
   readonly orderConfirmation: Locator;
   readonly errorMessage: Locator;
+  readonly subtotalLabel: Locator;
+  readonly taxLabel: Locator;
+  readonly totalLabel: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -21,6 +24,9 @@ export class CheckoutPage {
     this.cancelButton = page.locator('[data-test="cancel"]');
     this.orderConfirmation = page.locator('.complete-header');
     this.errorMessage = page.locator('[data-test="error"]');
+    this.subtotalLabel = page.locator('.summary_subtotal_label');
+    this.taxLabel = page.locator('.summary_tax_label');
+    this.totalLabel = page.locator('.summary_total_label');
   }
 
   async fillShippingInfo(firstName: string, lastName: string, postalCode: string) {
@@ -41,5 +47,27 @@ export class CheckoutPage {
 
   async expectOrderComplete() {
     await expect(this.orderConfirmation).toHaveText('Thank you for your order!');
+  }
+
+  async expectErrorMessage(message: string) {
+    await expect(this.errorMessage).toBeVisible();
+    await expect(this.errorMessage).toContainText(message);
+  }
+
+  private async parseCurrency(locator: Locator): Promise<number> {
+    const text = await locator.textContent();
+    return parseFloat((text ?? '').replace(/[^0-9.]/g, ''));
+  }
+
+  async getSubtotal(): Promise<number> {
+    return this.parseCurrency(this.subtotalLabel);
+  }
+
+  async getTax(): Promise<number> {
+    return this.parseCurrency(this.taxLabel);
+  }
+
+  async getTotal(): Promise<number> {
+    return this.parseCurrency(this.totalLabel);
   }
 }
