@@ -12,7 +12,8 @@
     "paths": {
       "@pages/*": ["pages/*"],
       "@fixtures/*": ["fixtures/*"],
-      "@utils/*": ["utils/*"]
+      "@utils/*": ["utils/*"],
+      "@api/*": ["api/*"]
     }
   },
   "include": ["**/*.ts"],

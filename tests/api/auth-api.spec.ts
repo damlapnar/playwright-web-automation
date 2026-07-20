@@ -1,69 +1,98 @@
-import { test, expect } from '@playwright/test';
+import { apiTest, authedApiTest, expect } from '@fixtures/api.fixture';
+import { primaryAuthUser } from '@api/constants';
 
-const BASE = 'https://dummyjson.com';
-
-test.describe('API Tests — Auth & Resources', () => {
-  test('POST /auth/login returns token for valid credentials', async ({ request }) => {
-    const res = await request.post(`${BASE}/auth/login`, {
-      data: { username: 'emilys', password: 'emilyspass' },
-    });
+apiTest.describe('API — Auth', () => {
+  apiTest('POST /auth/login returns a token pair for valid credentials', async ({ authClient }) => {
+    const res = await authClient.login(primaryAuthUser.username, primaryAuthUser.password);
     expect(res.status()).toBe(200);
     const body = await res.json();
     expect(typeof body.accessToken).toBe('string');
     expect(body.accessToken.length).toBeGreaterThan(0);
+    expect(typeof body.refreshToken).toBe('string');
+    expect(body.username).toBe(primaryAuthUser.username);
   });
 
-  test('POST /auth/login returns 400 for invalid credentials', async ({ request }) => {
-    const res = await request.post(`${BASE}/auth/login`, {
-      data: { username: 'invalid_user', password: 'wrongpass' },
-    });
+  apiTest('POST /auth/login returns 400 for a wrong password', async ({ authClient }) => {
+    const res = await authClient.login(primaryAuthUser.username, 'wrong-password');
     expect(res.status()).toBe(400);
     const body = await res.json();
     expect(body.message).toBeDefined();
   });
 
-  test('POST /auth/login without username returns error', async ({ request }) => {
-    const res = await request.post(`${BASE}/auth/login`, {
-      data: { password: 'somepass' },
+  apiTest('POST /auth/login returns 400 for an unknown username', async ({ authClient }) => {
+    const res = await authClient.login('does-not-exist', 'irrelevant');
+    expect(res.status()).toBe(400);
+  });
+
+  apiTest('POST /auth/login without a password returns 400', async ({ authClient }) => {
+    const res = await authClient.login(primaryAuthUser.username, '');
+    expect(res.status()).toBe(400);
+  });
+
+  apiTest('POST /auth/login rejects a malformed JSON body', async ({ request }) => {
+    const res = await request.post('https://dummyjson.com/auth/login', {
+      headers: { 'Content-Type': 'application/json' },
+      data: '{not valid json',
     });
     expect(res.status()).toBe(400);
   });
 
-  test('GET /users returns user list with pagination', async ({ request }) => {
-    const res = await request.get(`${BASE}/users?limit=10`);
+  apiTest('POST /auth/login honors expiresInMins on the issued token', async ({ authClient }) => {
+    const res = await authClient.login(primaryAuthUser.username, primaryAuthUser.password, 1);
     expect(res.status()).toBe(200);
     const body = await res.json();
-    expect(body.users).toBeInstanceOf(Array);
-    expect(body.total).toBeGreaterThan(0);
+    const payload = JSON.parse(Buffer.from(body.accessToken.split('.')[1], 'base64').toString());
+    // 1 minute expiry, +/- a few seconds of clock/network slack
+    expect(payload.exp - payload.iat).toBeLessThanOrEqual(65);
   });
 
-  test('GET /users second page returns different users', async ({ request }) => {
-    const [p1, p2] = await Promise.all([
-      request.get(`${BASE}/users?limit=5&skip=0`),
-      request.get(`${BASE}/users?limit=5&skip=5`),
-    ]);
-    expect(p1.status()).toBe(200);
-    expect(p2.status()).toBe(200);
-    const b1 = await p1.json();
-    const b2 = await p2.json();
-    expect(b1.users[0].id).not.toBe(b2.users[0].id);
+  apiTest('GET /auth/me without a token returns 401', async ({ authClient }) => {
+    const res = await authClient.me();
+    expect(res.status()).toBe(401);
   });
 
-  test('GET /products returns resource list', async ({ request }) => {
-    const res = await request.get(`${BASE}/products`);
-    expect(res.status()).toBe(200);
-    const body = await res.json();
-    expect(body.products).toBeInstanceOf(Array);
-    expect(body.products.length).toBeGreaterThan(0);
-    expect(body.products[0]).toHaveProperty('title');
+  apiTest('GET /auth/me with a garbage token returns 401', async ({ authClient }) => {
+    const res = await authClient.me('not-a-real-token');
+    expect(res.status()).toBe(401);
   });
 
-  test('PATCH /users/:id returns updated fields', async ({ request }) => {
-    const res = await request.patch(`${BASE}/users/2`, {
-      data: { firstName: 'QA Engineer' },
-    });
-    expect(res.status()).toBe(200);
-    const body = await res.json();
-    expect(body.firstName).toBe('QA Engineer');
-  });
+  authedApiTest(
+    'GET /auth/me with a valid token returns the logged-in user',
+    async ({ authClient, accessToken }) => {
+      const res = await authClient.me(accessToken);
+      expect(res.status()).toBe(200);
+      const body = await res.json();
+      expect(body.username).toBe(primaryAuthUser.username);
+      expect(body.email).toContain('@');
+    }
+  );
+
+  authedApiTest(
+    'POST /auth/refresh exchanges a refresh token for a new token pair',
+    async ({ authClient }) => {
+      const login = await authClient.login(primaryAuthUser.username, primaryAuthUser.password);
+      const { refreshToken } = await login.json();
+
+      const refreshed = await authClient.refresh(refreshToken);
+      expect(refreshed.status()).toBe(200);
+      const body = await refreshed.json();
+      expect(typeof body.accessToken).toBe('string');
+      expect(body.accessToken.length).toBeGreaterThan(0);
+
+      // The freshly issued access token must itself be usable against /auth/me
+      // — this is the real contract, not whether it byte-differs from the
+      // original (dummyjson's JWTs are deterministic per second-granularity
+      // `iat`, so back-to-back calls can legitimately mint an identical token).
+      const me = await authClient.me(body.accessToken);
+      expect(me.status()).toBe(200);
+    }
+  );
+
+  apiTest(
+    'POST /auth/refresh with an invalid refresh token returns 403',
+    async ({ authClient }) => {
+      const res = await authClient.refresh('not-a-real-refresh-token');
+      expect(res.status()).toBe(403);
+    }
+  );
 });

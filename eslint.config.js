@@ -30,8 +30,9 @@ module.exports = tseslint.config(
     ...playwright.configs['flat/recommended'],
     settings: {
       playwright: {
-        // fixtures/auth.fixture.ts extends `test` under these names
-        globalAliases: { test: ['authenticatedTest', 'cartTest'] },
+        // fixtures/auth.fixture.ts and fixtures/api.fixture.ts extend `test`
+        // under these names
+        globalAliases: { test: ['authenticatedTest', 'cartTest', 'apiTest', 'authedApiTest'] },
       },
     },
     rules: {
