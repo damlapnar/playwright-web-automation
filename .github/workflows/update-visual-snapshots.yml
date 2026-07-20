@@ -42,7 +42,7 @@ jobs:
           BASE_URL: https://www.saucedemo.com
 
       - name: Upload snapshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: visual-snapshots-${{ matrix.browser }}
           path: tests/e2e/visual.spec.ts-snapshots/
