@@ -29,7 +29,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
     "@eslint/js": "^9.39.5",
-    "@playwright/test": "^1.45.0",
+    "@playwright/test": "^1.62.0",
     "@types/node": "^20.0.0",
     "allure-commandline": "^2.43.0",
     "allure-playwright": "^3.10.2",
