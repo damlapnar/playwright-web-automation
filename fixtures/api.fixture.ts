@@ -4,6 +4,7 @@ import { UsersClient } from '@api/UsersClient';
 import { ProductsClient } from '@api/ProductsClient';
 import { CartsClient } from '@api/CartsClient';
 import { PostsClient } from '@api/PostsClient';
+import { TodosClient } from '@api/TodosClient';
 import { DUMMYJSON_BASE_URL, primaryAuthUser } from '@api/constants';
 
 type ApiClients = {
@@ -12,6 +13,7 @@ type ApiClients = {
   productsClient: ProductsClient;
   cartsClient: CartsClient;
   postsClient: PostsClient;
+  todosClient: TodosClient;
 };
 
 export const apiTest = base.extend<ApiClients>({
@@ -29,6 +31,9 @@ export const apiTest = base.extend<ApiClients>({
   },
   postsClient: async ({ request }, use) => {
     await use(new PostsClient(request));
+  },
+  todosClient: async ({ request }, use) => {
+    await use(new TodosClient(request));
   },
 });
 
