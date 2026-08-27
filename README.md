@@ -12,7 +12,8 @@ End-to-end web automation framework built with Playwright and TypeScript. Featur
 - **Page Object Model** — maintainable, reusable page abstractions
 - **Cross-browser** — Chromium, Firefox, WebKit, mobile viewports
 - **Custom Fixtures** — pre-authenticated test contexts (UI and API)
-- **API Testing** — typed request clients (the API equivalent of Page Objects) covering two providers: auth/users/products/carts CRUD, contract/resilience checks, and negative cases — run in a dedicated browser-less CI lane
+- **API Testing** — typed request clients (the API equivalent of Page Objects) covering two providers: auth/users/products/carts/todos CRUD, contract/resilience checks, and negative cases — run in a dedicated browser-less CI lane
+- **Dynamic Test Data** — `@faker-js/faker` generates request payloads at run time instead of hardcoded literals, so write tests don't collide across parallel workers or depend on one fixed string
 - **Parallel Execution** — configurable worker count
 - **CI/CD** — GitHub Actions with matrix strategy per browser
 - **Reporting** — HTML, JSON, and Allure reports with screenshots and video on failure
@@ -24,18 +25,20 @@ End-to-end web automation framework built with Playwright and TypeScript. Featur
 - **Smoke Tagging** — `@smoke` tags a small critical-path subset for fast iteration (`npm run test:smoke`); everything else is implicit full regression
 - **Pre-commit Hooks** — Husky + lint-staged run ESLint/Prettier on staged files before every commit
 - **Dependency Automation** — Dependabot keeps npm and GitHub Actions dependencies current; `npm audit` + dependency review gate CI
+- **PR CI Summary** — a sticky bot comment aggregates the lint job and the full test matrix result on every pull request, updated in place on each push
+- **Concurrency Cancellation** — a new push to a branch/PR cancels its own still-running CI, instead of burning minutes on a superseded run
 
 ## Project Structure
 
 ```
 playwright-web-automation/
 ├── pages/               # Page Object classes (UI)
-├── api/                 # Typed API request clients (Auth/Users/Products/Carts/Posts)
+├── api/                 # Typed API request clients (Auth/Users/Products/Carts/Posts/Todos)
 ├── tests/
 │   ├── e2e/             # End-to-end UI tests
 │   └── api/             # API tests — auth, CRUD, contract/resilience
 ├── fixtures/            # Custom test fixtures (UI auth reuse + API clients/tokens)
-├── utils/               # Shared test data
+├── utils/               # Shared test data + faker-based dynamic payload generators
 ├── .github/
 │   ├── workflows/       # CI/CD pipelines
 │   └── dependabot.yml
@@ -89,9 +92,9 @@ npm run allure:open
 
 ## CI/CD
 
-Tests run automatically on every push and pull request via GitHub Actions across the `api` project plus all three desktop browsers and mobile Chrome/Safari, all in parallel. Scheduled runs execute every weekday at 8 AM. Node modules and Playwright browser binaries are cached between runs, and each job is capped with `timeout-minutes` so a hung test can't silently block CI for hours.
+Tests run automatically on every push and pull request via GitHub Actions across the `api` project plus all three desktop browsers and mobile Chrome/Safari, all in parallel. Scheduled runs execute every weekday at 8 AM. Node modules and Playwright browser binaries are cached between runs, and each job is capped with `timeout-minutes` so a hung test can't silently block CI for hours. A `concurrency` group cancels a run that a newer push to the same branch/PR has already superseded.
 
-Each job's step summary reports pass/fail counts, lists any failed test titles, and flags any test that only passed after a retry, so instability that CI's `retries: 2` would otherwise silently absorb stays visible.
+Each job's step summary reports pass/fail counts, lists any failed test titles, and flags any test that only passed after a retry, so instability that CI's `retries: 2` would otherwise silently absorb stays visible. On pull requests, a final `pr-summary` job posts (and keeps updated) a single sticky comment aggregating the lint job and the whole test matrix's pass/fail state, linking back to the full per-project step summaries.
 
 ---
 
@@ -115,14 +118,15 @@ Playwright's async API and built-in auto-waiting eliminate flaky sleeps. Native 
 | Parallel execution     | Workers per browser project                                           | GitHub Actions matrix runs all 6 projects simultaneously; fail-fast=false catches all regressions                                           |
 | Path aliases           | `@pages/*`, `@fixtures/*`, `@utils/*`, `@api/*`                       | Playwright resolves tsconfig paths natively; avoids `../../` chains                                                                         |
 | Docker browser install | `playwright install` at build time                                    | Browsers always match whatever `@playwright/test` resolves to — can't silently drift like a pinned tag                                      |
+| API write payloads     | `@faker-js/faker` in `utils/fakerData.ts`                             | Fresh data per run instead of shared literals — parallel workers stop colliding on the same hardcoded string                                |
 
 ### Test Pyramid
 
 ```
         ┌──────────────────┐
-        │   E2E (Playwright)│  ← 12 spec files, full browser
+        │   E2E (Playwright)│  ← 13 spec files, full browser
         ├──────────────────┤
-        │   API Tests       │  ← 6 spec files, HTTP only, two providers
+        │   API Tests       │  ← 7 spec files, HTTP only, two providers
         └──────────────────┘
 ```
 
@@ -136,6 +140,7 @@ Playwright's async API and built-in auto-waiting eliminate flaky sleeps. Native 
 | `users-api.spec.ts`    | CRUD, pagination, `select`, `sortBy`, search, filter, negative/injection-shaped input                |
 | `products-api.spec.ts` | CRUD, categories, category filtering, search, sort                                                   |
 | `carts-api.spec.ts`    | CRUD, computed cart/product totals, merge semantics                                                  |
+| `todos-api.spec.ts`    | CRUD, pagination, random todo, filtering by user; write payloads generated via faker                 |
 | `contract-api.spec.ts` | Content-type headers, response-time budget, malformed bodies, oversized/negative ids, unknown routes |
 | `posts-api.spec.ts`    | A second provider (jsonplaceholder) — CRUD, nested comments resource                                 |
 

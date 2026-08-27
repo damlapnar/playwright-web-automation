@@ -8,6 +8,14 @@ on:
   schedule:
     - cron: '0 8 * * 1-5'
 
+# A new push to the same PR/branch supersedes whatever's already running for
+# it — cancel the stale run instead of burning CI minutes on a result nobody
+# will look at. Scheduled runs get their own ref per invocation, so this
+# never cancels one cron run mid-flight because another started.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -125,3 +133,68 @@ jobs:
           path: allure-report/
           if-no-files-found: ignore
           retention-days: 30
+
+  # Each matrix leg already writes its own step summary; this posts one
+  # sticky PR comment aggregating the lint job and the test matrix as a
+  # whole, so a reviewer sees pass/fail at a glance without opening the
+  # Actions tab. Runs even when earlier jobs fail (that's the case it
+  # matters most for) but only on pull_request — push/schedule runs have no
+  # PR to comment on. Skipped for PRs from forks: GitHub always serves those
+  # `pull_request` runs a read-only token regardless of the `permissions`
+  # block below, so the comment call would just 403.
+  pr-summary:
+    needs: [lint, test]
+    if: >-
+      always() && github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Comment CI summary on the PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const lintResult = '${{ needs.lint.result }}';
+            const testResult = '${{ needs.test.result }}';
+            const icon = (r) => (r === 'success' ? '✅' : r === 'skipped' ? '⚪' : '❌');
+            const marker = '<!-- playwright-ci-summary -->';
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            const body = [
+              marker,
+              '## Playwright CI Summary',
+              '',
+              '| Job | Result |',
+              '|-----|--------|',
+              `| Lint & typecheck | ${icon(lintResult)} ${lintResult} |`,
+              `| Test matrix (api + browsers) | ${icon(testResult)} ${testResult} |`,
+              '',
+              `Per-project pass/fail counts and any failed/flaky test titles are in each matrix leg's [step summary](${runUrl}).`,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(
+              (c) => c.user.type === 'Bot' && c.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

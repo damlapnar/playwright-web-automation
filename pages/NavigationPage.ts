@@ -9,6 +9,10 @@ export class NavigationPage {
   readonly aboutSidebarLink: Locator;
   readonly logoutSidebarLink: Locator;
   readonly resetSidebarLink: Locator;
+  readonly footer: Locator;
+  readonly socialTwitterLink: Locator;
+  readonly socialFacebookLink: Locator;
+  readonly socialLinkedinLink: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -19,6 +23,10 @@ export class NavigationPage {
     this.aboutSidebarLink = page.locator('#about_sidebar_link');
     this.logoutSidebarLink = page.locator('#logout_sidebar_link');
     this.resetSidebarLink = page.locator('#reset_sidebar_link');
+    this.footer = page.locator('.footer');
+    this.socialTwitterLink = page.locator('.social_twitter a');
+    this.socialFacebookLink = page.locator('.social_facebook a');
+    this.socialLinkedinLink = page.locator('.social_linkedin a');
   }
 
   async openMenu() {

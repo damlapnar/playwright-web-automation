@@ -102,7 +102,7 @@ anything headed toward a PR, since CI enforces the same checks anyway.
 
 ## Scaling CI with Sharding
 
-The current suite (282 tests across 6 projects) runs comfortably in one job
+The current suite (300 tests across 6 projects) runs comfortably in one job
 per project. If it grows large enough that a single project's run becomes
 the bottleneck, Playwright can split a project's tests across multiple
 machines:
