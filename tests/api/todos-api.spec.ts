@@ -48,12 +48,19 @@ apiTest.describe('API — Todos', () => {
   });
 
   apiTest("GET /todos/user/:userId returns only that user's todos", async ({ todosClient }) => {
-    const res = await todosClient.byUser(5);
+    // Picked from a live todo rather than hardcoded — dummyjson's ~150 todos
+    // aren't spread evenly across every userId, so a fixed id (e.g. 5) can
+    // legitimately own zero todos and fail this for a reason that has
+    // nothing to do with the endpoint's actual filtering behavior.
+    const sample = await (await todosClient.list({ limit: 1 })).json();
+    const knownUserId = sample.todos[0].userId;
+
+    const res = await todosClient.byUser(knownUserId);
     expect(res.status()).toBe(200);
     const body = await res.json();
     expect(body.todos.length).toBeGreaterThan(0);
     for (const todo of body.todos) {
-      expect(todo.userId).toBe(5);
+      expect(todo.userId).toBe(knownUserId);
     }
   });
 

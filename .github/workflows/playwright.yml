@@ -46,6 +46,15 @@ jobs:
 
       - name: Dependency review
         if: github.event_name == 'pull_request'
+        # Requires the repo's Dependency graph to be enabled (Settings →
+        # Security) — an admin-only toggle this workflow can't flip. It's
+        # been off since some point after 2026-07-18, so this step now
+        # hard-fails "lint" on every real PR (dependabot's included, see
+        # runs #67-81) for a reason that has nothing to do with what any of
+        # those PRs actually changed. continue-on-error keeps the step
+        # informative without it silently blocking merges on an unrelated
+        # repo setting; remove this once Dependency graph is turned back on.
+        continue-on-error: true
         uses: actions/dependency-review-action@v4
 
   test:
